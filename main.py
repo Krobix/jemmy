@@ -29,7 +29,6 @@ if not os.path.isdir("~/history"):
     os.mkdir("~/history")
 
 with open("~/token.txt", "r") as f:
-    global token
     token = f.read()
     token = token.strip()
 
