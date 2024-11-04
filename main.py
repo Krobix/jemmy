@@ -57,6 +57,7 @@ class Jemmy(discord.Client):
                 res = os.system(f"ping -c 1 {url}")
                 if res==0:
                     addr = url
+                    break
 
             if is_dm:
                 if os.path.isfile(filename):
@@ -91,7 +92,7 @@ class Jemmy(discord.Client):
             req["prompt"] = prompt
 
             async with aiohttp.ClientSession() as session:
-                async with session.post(f"http://{addr}/api/v1/generate", json=req) as res:
+                async with session.post(f"http://{addr}:5001/api/v1/generate", json=req) as res:
                     print(f"Got response from KoboldAI: {res.status} {res.reason}\n\n")
 
                     if res.status==200:
