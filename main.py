@@ -54,7 +54,7 @@ class Jemmy(discord.Client):
             generated = ""
 
             for url in ai_urls:
-                res = os.system(f"ping 1 {url}")
+                res = os.system(f"ping -c 1 {url}")
                 if res==0:
                     addr = url
 
