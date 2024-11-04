@@ -29,6 +29,10 @@ token = ""
 if not os.path.isdir(f"{os.getenv('HOME')}/history"):
     os.mkdir(f"{os.getenv('HOME')}/history")
 
+if os.path.isfile(f"{os.getenv('HOME')}/systemprompt.txt"):
+    with open(f"{os.getenv('HOME')}/systemprompt.txt", 'r') as f:
+        SYSTEM_PROMPT = f.read()
+
 with open(f"{os.getenv('HOME')}/token.txt", "r") as f:
     token = f.read()
     token = token.strip()
