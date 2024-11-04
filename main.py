@@ -38,7 +38,7 @@ class Jemmy(discord.Client):
         print("Logged in!!!")
 
     async def on_message(self, msg):
-        is_dm = isinstance(discord.channel.DMChannel, msg.channel)
+        is_dm = isinstance(msg.channel, discord.channel.DMChannel)
         if msg.author.id == self.user.id:
             return
 
