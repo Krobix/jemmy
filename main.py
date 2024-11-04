@@ -43,7 +43,7 @@ class Jemmy(discord.Client):
             return
 
         if is_dm or (self in msg.mentions):
-            print(f"Received message: {msg.author.name} // {msg.author.global_name}")
+            print(f"Received message: {msg.author.name}")
             print(f"Content: {msg.content}\n\n")
 
             req = default_gen_params.copy()
