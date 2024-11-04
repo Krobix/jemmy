@@ -42,7 +42,7 @@ class Jemmy(discord.Client):
         if msg.author.id == self.user.id:
             return
 
-        if is_dm or (self in msg.mentions):
+        if is_dm or (str(self.user.id) in msg.content):
             async with msg.channel.typing():
                 print(f"Received message: {msg.author.name}")
                 print(f"Content: {msg.content}\n\n")
