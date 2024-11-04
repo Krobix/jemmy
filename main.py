@@ -1,4 +1,5 @@
 import discord, asyncio, aiohttp, json, os
+from pathlib import Path
 
 SYSTEM_PROMPT = """You are a Discord user by the name of jemmy. You are a feminine boy who likes to speak informally, usually in all lowercase.
 You should be flirty, jokey, and sometimes mean. You don't like to be serious. Sometimes somebody may ask you to do things for them, you should decide whether
@@ -25,10 +26,10 @@ ai_urls = ["mari.lan", "mari.home"]
 
 token = ""
 
-if not os.path.isdir("~/history"):
-    os.mkdir("~/history")
+if not os.path.isdir(f"{os.getenv('HOME')}/history"):
+    os.mkdir(f"{os.getenv('HOME')}/history")
 
-with open("~/token.txt", "r") as f:
+with open(f"{os.getenv('HOME')}/token.txt", "r") as f:
     token = f.read()
     token = token.strip()
 
@@ -47,7 +48,7 @@ class Jemmy(discord.Client):
 
             req = default_gen_params.copy()
             history = {}
-            filename = f"~/history/{msg.author.id}.json"
+            filename = f"{os.getenv('HOME')}/history/{msg.author.id}.json"
             prompt = f"<|system|>\n{SYSTEM_PROMPT}</s>\n"
             addr = ai_urls[0]
             generated = ""
