@@ -43,79 +43,80 @@ class Jemmy(discord.Client):
             return
 
         if is_dm or (self in msg.mentions):
-            print(f"Received message: {msg.author.name}")
-            print(f"Content: {msg.content}\n\n")
+            async with msg.channel.typing():
+                print(f"Received message: {msg.author.name}")
+                print(f"Content: {msg.content}\n\n")
 
-            req = default_gen_params.copy()
-            history = {}
-            filename = f"{os.getenv('HOME')}/history/{msg.author.id}.json"
-            prompt = f"<|system|>\n{SYSTEM_PROMPT}</s>\n"
-            addr = ai_urls[0]
-            generated = ""
+                req = default_gen_params.copy()
+                history = {}
+                filename = f"{os.getenv('HOME')}/history/{msg.author.id}.json"
+                prompt = f"<|system|>\n{SYSTEM_PROMPT}</s>\n"
+                addr = ai_urls[0]
+                generated = ""
 
-            for url in ai_urls:
-                res = os.system(f"ping -c 1 {url}")
-                if res==0:
-                    addr = url
-                    break
-
-            if is_dm:
-                if os.path.isfile(filename):
-                    with open(filename, "r") as f:
-                        history = json.load(f)
-                else:
-                    history["messages"] = []
-
-                umsg_h = {
-                    "author": "user",
-                    "content": msg.content
-                }
-
-                history["messages"].append(umsg_h)
-
-                while "<|system|>" in umsg_h["content"] or "<|user|>" in umsg_h["content"] or "<|assistant|>" in umsg_h["content"]:
-                    for s in ("<|system|>", "<|assistant|>", "<|user|>"):
-                        umsg_h["content"] = umsg_h["content"].replace(s, "")
-
-                i = 0
-                for m in history["messages"]:
-                    if i >= MAX_MSG_HISTORY:
+                for url in ai_urls:
+                    res = os.system(f"ping -c 1 {url}")
+                    if res==0:
+                        addr = url
                         break
-                    prompt += f"<|{m['author']}|>\n{m['content']}</s>\n"
-                    i += 1
 
-                prompt += "<|assistant|>\n"
-
-            else:
-                prompt += f"<|user|>\n{msg.content}</s>\n<|assistant|>\n"
-
-            req["prompt"] = prompt
-
-            async with aiohttp.ClientSession() as session:
-                async with session.post(f"http://{addr}:5001/api/v1/generate", json=req) as res:
-                    print(f"Got response from KoboldAI: {res.status} {res.reason}\n\n")
-
-                    if res.status==200:
-                        generated += (await res.json())['results'][0]['text']
-
+                if is_dm:
+                    if os.path.isfile(filename):
+                        with open(filename, "r") as f:
+                            history = json.load(f)
                     else:
-                        await msg.channel.send(f"Error contacting KoboldAI: {res.status}: {res.reason}")
-                        return
+                        history["messages"] = []
 
-            if is_dm:
-                amsg_h = {
-                    "author": "assistant",
-                    "content": generated
-                }
-                history["messages"].append(amsg_h)
+                    umsg_h = {
+                        "author": "user",
+                        "content": msg.content
+                    }
 
-                with open(filename, "w") as f:
-                    json.dump(history, f)
+                    history["messages"].append(umsg_h)
 
-            if "</s>" in generated:
-                generated = generated.split("</s>")[0]
+                    while "<|system|>" in umsg_h["content"] or "<|user|>" in umsg_h["content"] or "<|assistant|>" in umsg_h["content"]:
+                        for s in ("<|system|>", "<|assistant|>", "<|user|>"):
+                            umsg_h["content"] = umsg_h["content"].replace(s, "")
 
-            await msg.channel.send(generated)
+                    i = 0
+                    for m in history["messages"]:
+                        if i >= MAX_MSG_HISTORY:
+                            break
+                        prompt += f"<|{m['author']}|>\n{m['content']}</s>\n"
+                        i += 1
+
+                    prompt += "<|assistant|>\n"
+
+                else:
+                    prompt += f"<|user|>\n{msg.content}</s>\n<|assistant|>\n"
+
+                req["prompt"] = prompt
+
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(f"http://{addr}:5001/api/v1/generate", json=req) as res:
+                        print(f"Got response from KoboldAI: {res.status} {res.reason}\n\n")
+
+                        if res.status==200:
+                            generated += (await res.json())['results'][0]['text']
+
+                        else:
+                            await msg.channel.send(f"Error contacting KoboldAI: {res.status}: {res.reason}")
+                            return
+
+                if is_dm:
+                    amsg_h = {
+                        "author": "assistant",
+                        "content": generated
+                    }
+                    history["messages"].append(amsg_h)
+
+                    with open(filename, "w") as f:
+                        json.dump(history, f)
+
+                if "</s>" in generated:
+                    generated = generated.split("</s>")[0]
+
+                await msg.channel.send(generated)
 
 
 
