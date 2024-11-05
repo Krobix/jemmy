@@ -12,7 +12,7 @@ default_gen_params = {
   "rep_pen": 1.1,
   "rep_pen_range": 256,
   "rep_pen_slope": 1,
-  "temperature": 0.5,
+  "temperature": 1.2,
   "tfs": 1,
   "top_a": 0,
   "top_k": 100,
