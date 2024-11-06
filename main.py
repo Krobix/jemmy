@@ -72,12 +72,12 @@ class Jemmy(discord.Client):
                 if is_reply_to_me:
                     reply_thread = []
                     tmes = msg
-                    while tmes.reference is not None:
+                    while True:
                         reply_thread.append(tmes)
                         try:
                             tmes = await msg.channel.fetch_message(tmes.reference.message_id)
                         except:
-                            pass
+                            break
                     reply_thread.reverse()
 
                     for m in reply_thread:
