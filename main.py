@@ -43,10 +43,15 @@ class Jemmy(discord.Client):
 
     async def on_message(self, msg):
         is_dm = isinstance(msg.channel, discord.channel.DMChannel)
+        is_reply = (msg.reference is not None)
+        if is_reply:
+            is_reply_to_me = (await msg.channel.fetch_message(msg.reference.message_id)).author.id==self.user.id
+        else:
+            is_reply_to_me = False
         if msg.author.id == self.user.id:
             return
 
-        if is_dm or (str(self.user.id) in msg.content):
+        if is_dm or (str(self.user.id) in msg.content) or is_reply_to_me:
             async with msg.channel.typing():
                 print(f"Received message: {msg.author.name}")
                 print(f"Content: {msg.content}\n\n")
@@ -63,6 +68,24 @@ class Jemmy(discord.Client):
                     if res==0:
                         addr = url
                         break
+
+                if is_reply_to_me:
+                    reply_thread = []
+                    tmes = msg
+                    while tmes.reference is not None:
+                        reply_thread.append(tmes)
+                        try:
+                            tmes = await msg.channel.fetch_message(tmes.reference.message_id)
+                        except:
+                            pass
+                    reply_thread.reverse()
+
+                    for m in reply_thread:
+                        if m.author.id==self.user.id:
+                            sender = "assistant"
+                        else:
+                            sender = "user"
+                        prompt += f"<|{sender}|>\n{m.content}</s>\n"
 
                 if is_dm:
                     if os.path.isfile(filename):
@@ -120,7 +143,7 @@ class Jemmy(discord.Client):
                 if "</s>" in generated:
                     generated = generated.split("</s>")[0]
 
-                await msg.channel.send(generated)
+                await msg.reply(generated)
 
 
 
