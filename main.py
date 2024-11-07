@@ -37,6 +37,17 @@ with open(f"{os.getenv('HOME')}/token.txt", "r") as f:
     token = f.read()
     token = token.strip()
 
+with open("badwords.txt", "r") as f:
+    badwords = f.read().strip().split(" ")
+
+async def censor(text):
+    for w in badwords:
+        wlen = len(w)
+        while w in (tlower:=text.lower()):
+            loc = tlower.find(w)
+            text = text[:loc] + ("~"*wlen) + text[(loc+wlen):]
+        return text
+
 class Jemmy(discord.Client):
     async def on_ready(self):
         print("Logged in!!!")
@@ -142,6 +153,8 @@ class Jemmy(discord.Client):
 
                 if "</s>" in generated:
                     generated = generated.split("</s>")[0]
+
+                generated = await censor(generated)
 
                 await msg.reply(generated)
 
